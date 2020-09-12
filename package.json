@@ -15,6 +15,7 @@
     "webpack": "^4.44.1"
   },
   "dependencies": {
+    "local-echo": "github:wavesoft/local-echo",
     "xterm": "^4.9.0",
     "xterm-addon-fit": "^0.4.0"
   }

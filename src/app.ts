@@ -1,80 +1,120 @@
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
+import LocalEchoController from './3rdparty/local-echo/LocalEchoController';
 import 'xterm/css/xterm.css';
 import './css/style.css';
 
-let pendingDels: number = 0;
+let tryBlock: boolean = false;
+let blocked: boolean = true;
+let ready: boolean = false;
+let serverBuffer: string = '';
 
-/*enum Direction {
-    Left, Right
-};
+let resolveMore: () => void = function() {};
 
-const revertMoveMap: string[] = [`\x1b[C`, `\x1b[D`];
+let more = function() {
+    blocked = true;
+    let p = new Promise<void>((res, _) => {
+        resolveMore = function() {
+            res();
+            blocked = false;
+            console.log('input unblocked.');
+        };
+    });
+    if (!tryBlock) resolveMore();
+    if (tryBlock) console.log('blocked input.');
+    return p;
+}
 
-let pendingMoves: Direction[] = [];*/
+async function reader() {
+    while (ready) {
+        try {
+            await more();
+            await (function () {
+                let p = localEcho.read('rs> ', '> ');
+                if (serverBuffer != '') {
+                    localEcho.handleTermData(serverBuffer);
+                }
+                return p;
+            })();
+        } catch (e) {
+            console.warn(`abort cli: ${e}`);
+        }
+    }
+}
 
 function attach() {
-    term.reset();
     ws.onmessage = (message) => {
-        let data = new Uint8Array(message.data);
-        if (data.length < 1) return;
+        var msg = message.data as string;
+        console.log(`in: "${msg}"`);
 
-        let spaces = data[data.length - 1] == 0x20 ? 1 : 0; // means del event accepted
-        let bells = data.filter(d => d == 0x07).length; // means any event rejected
+        let resMatch = msg.match(/rs> ([^\n]*)$/);
+        console.log(resMatch);
 
-        spaces = data.every(d => d == 0x20) ? data.length : spaces;
-        bells = data.every(d => d == 0x07) ? data.length : bells;
-
-        let space_omit: number = 0;
-
-        if (pendingDels > 0) {
-            space_omit = pendingDels >= spaces ? spaces : pendingDels - spaces;
-            term.write('\x1b[D \x1b[D'.repeat(space_omit));
-            pendingDels -= spaces;
-            spaces = -pendingDels;
-            pendingDels = pendingDels < 0 ? 0 : pendingDels;
+        if (resMatch) {
+            serverBuffer = resMatch[1];
         }
 
-        if (pendingDels > 0) {
-            pendingDels -= bells;
-            bells -= pendingDels;
-            pendingDels = pendingDels < 0 ? 0 : pendingDels;
-        }
-
-        /*if (bells > 0) {
-            for (; bells > 0; bells--) {
-                let d: Direction = pendingMoves.pop();
-                term.write(revertMoveMap[d]);
+        if (tryBlock && resMatch) {
+            if (blocked) {
+                msg = msg.replace(/rs> /g, '');
+                tryBlock = false;
+                resolveMore();
             }
-        }*/
+        }
 
-        let i = 0;
-        term.write(data.filter(v => { if (v == 0x20) i++; return v != 0x20 || i > space_omit; }));
-        
+        if (!msg.includes('rs> ')) {
+            tryBlock = true;
+        }
+
+        if (!msg.includes('\n') || msg == '\n') return;
+        if (msg == '\r\n') return;
+        msg = msg.replace(/\?/g, '');
+
+        if (msg.includes('--More--')) {
+            localEcho.abortRead('--More-- block');
+            tryBlock = true;
+        }
+
+        console.log(`blocked: ${blocked}`);
+        if (!ready) msg = msg.replace('rs> ', '');
+
+        if (!ready) {
+            ready = true;
+            reader();
+        }
+
+        term.write(msg);
     }
+
     term.onData((data) => {
         if (data.length < 0) return;
-        //let local_echo: boolean = false;
-        if (data == '\x7f') pendingDels++;
-        //if (data == `\x1b[D`) { pendingMoves.push(Direction.Left); local_echo = true; }
-        //if (data == `\x1b[C`) { pendingMoves.push(Direction.Right); local_echo = true; }
-        //if (local_echo) term.write(data);
-        if (data[0] < '\x20' && (data[0] != '\x0d')) return; // fuck it
-
+        if (data[0] == '?') localEcho._input = localEcho._input.replace(/\?/g, '');
         ws.send(data);
+        console.log(`out: "${data}"`);
     });
 }
 
-let ws = new WebSocket('wss://wsrs.nat.moe/rs');
+//let ws = new WebSocket('wss://wsrs.nat.moe/rs');
+let ws = new WebSocket('ws://127.0.0.1:8080/rs');
+
 const term = new Terminal();
+
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
+
+const localEcho = new LocalEchoController();
+term.loadAddon(localEcho);
 
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
 window.onresize = () => fitAddon.fit();
-ws.binaryType = 'arraybuffer';
 ws.onopen = () => attach();
-ws.onerror = () => term.write('Error connecting to rs.\n');
-ws.onclose = () => term.write('Disconnected.\n');
+ws.onerror = () => {
+    ready = false;
+    term.write('Error connecting to rs.\n');
+}
+ws.onclose = () => {
+    ready = false;
+    term.write('Disconnected.\n');
+}

@@ -2,13 +2,13 @@
   "compilerOptions": {
     "module": "es6",
     "target": "es5",
-    "noImplicitAny": true,
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
     "outDir": "public/",
     "moduleResolution": "node",
-    "downlevelIteration": true
+    "downlevelIteration": true,
+    "allowJs": true
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules"]
