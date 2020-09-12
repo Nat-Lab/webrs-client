@@ -65,7 +65,7 @@ function attach() {
     });
 }
 
-let ws = new WebSocket('ws://127.0.0.1:8080');
+let ws = new WebSocket('wss://wsrs.nat.moe/rs');
 const term = new Terminal();
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
