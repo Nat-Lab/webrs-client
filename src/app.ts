@@ -9,6 +9,8 @@ let blocked: boolean = true;
 let ready: boolean = false;
 let serverBuffer: string = '';
 
+const blockKeys = ['\x14', '\x1f', '\x17', '\x15', '\x19', '\t'];
+
 let resolveMore: () => void = function() {};
 
 let more = function() {
@@ -32,7 +34,9 @@ async function reader() {
             await (function () {
                 let p = localEcho.read('rs> ', '> ');
                 if (serverBuffer != '') {
+                    console.log(`inject buffer: "${serverBuffer}"`);
                     localEcho.handleTermData(serverBuffer);
+                    serverBuffer = '';
                 }
                 return p;
             })();
@@ -47,11 +51,11 @@ function attach() {
         var msg = message.data as string;
         console.log(`in: "${msg}"`);
 
-        let resMatch = msg.match(/rs> ([^\n]*)$/);
-        console.log(resMatch);
+        let resMatch = msg.match(/rs> +([^\n]*) *$/);
 
         if (resMatch) {
             serverBuffer = resMatch[1];
+            console.log(`update server-side in buffer: ${serverBuffer}`);
         }
 
         if (tryBlock && resMatch) {
@@ -89,6 +93,7 @@ function attach() {
     term.onData((data) => {
         if (data.length < 0) return;
         if (data[0] == '?') localEcho._input = localEcho._input.replace(/\?/g, '');
+        if (blockKeys.includes(data[0])) return;
         ws.send(data);
         console.log(`out: "${data}"`);
     });

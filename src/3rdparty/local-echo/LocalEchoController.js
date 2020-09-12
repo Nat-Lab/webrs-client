@@ -474,9 +474,20 @@ export default class LocalEchoController {
    * Handle a single piece of information from the terminal.
    */
   handleData(data) {
+    const ignore_keys = ['\t'];
     if (!this._active) return;
+    if (ignore_keys.includes(data[0])) return;
     const ord = data.charCodeAt(0);
     let ofs;
+    
+    switch(ord) {
+      case 0x01: this.setCursor(0); break;
+      case 0x02: this.handleCursorMove(-1); break;
+      case 0x04: this.handleCursorErase(false); break;
+      case 0x05: this.setCursor(this._input.length); break;
+      case 0x06: this.handleCursorMove(1); break;
+      case 0x08: this.handleCursorErase(true); break;
+    }
 
     // Handle ANSI escape sequences
     if (ord == 0x1b) {
@@ -554,68 +565,6 @@ export default class LocalEchoController {
 
         case "\x7F": // BACKSPACE
           this.handleCursorErase(true);
-          break;
-
-        case "\t": // TAB
-          if (this._autocompleteHandlers.length > 0) {
-            const inputFragment = this._input.substr(0, this._cursor);
-            const hasTailingSpace = hasTailingWhitespace(inputFragment);
-            const candidates = collectAutocompleteCandidates(
-              this._autocompleteHandlers,
-              inputFragment
-            );
-
-            // Sort candidates
-            candidates.sort();
-
-            // Depending on the number of candidates, we are handing them in
-            // a different way.
-            if (candidates.length === 0) {
-              // No candidates? Just add a space if there is none already
-              if (!hasTailingSpace) {
-                this.handleCursorInsert(" ");
-              }
-            } else if (candidates.length === 1) {
-              // Just a single candidate? Complete
-              const lastToken = getLastToken(inputFragment);
-              this.handleCursorInsert(
-                candidates[0].substr(lastToken.length) + " "
-              );
-            } else if (candidates.length <= this.maxAutocompleteEntries) {
-
-              // search for a shared fragement
-              const sameFragment = getSharedFragment(inputFragment, candidates);
-              
-              // if there's a shared fragement between the candidates
-              // print complete the shared fragment
-              if (sameFragment) {
-                const lastToken = getLastToken(inputFragment);
-                this.handleCursorInsert(
-                  sameFragment.substr(lastToken.length)
-                );
-              }
-
-              // If we are less than maximum auto-complete candidates, print
-              // them to the user and re-start prompt
-              this.printAndRestartPrompt(() => {
-                this.printWide(candidates);
-              });
-            } else {
-              // If we have more than maximum auto-complete candidates, print
-              // them only if the user acknowledges a warning
-              this.printAndRestartPrompt(() =>
-                this.readChar(
-                  `Display all ${candidates.length} possibilities? (y or n)`
-                ).then(yn => {
-                  if (yn == "y" || yn == "Y") {
-                    this.printWide(candidates);
-                  }
-                })
-              );
-            }
-          } else {
-            this.handleCursorInsert("    ");
-          }
           break;
 
         case "\x03": // CTRL+C
