@@ -112,9 +112,9 @@ window.onresize = () => fitAddon.fit();
 ws.onopen = () => attach();
 ws.onerror = () => {
     ready = false;
-    term.write('Error connecting to rs.\n');
+    term.write('Error connecting to rs.\r\n');
 }
 ws.onclose = () => {
     ready = false;
-    term.write('Disconnected.\n');
+    term.write('Disconnected.\r\n');
 }
