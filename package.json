@@ -1,0 +1,21 @@
+{
+  "name": "webrs-client",
+  "version": "0.0.1",
+  "description": "webrs client",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "nat <nat@nat.moe>",
+  "license": "MIT",
+  "devDependencies": {
+    "css-loader": "^4.3.0",
+    "style-loader": "^1.2.1",
+    "ts-loader": "^8.0.3",
+    "webpack": "^4.44.1"
+  },
+  "dependencies": {
+    "xterm": "^4.9.0",
+    "xterm-addon-fit": "^0.4.0"
+  }
+}
