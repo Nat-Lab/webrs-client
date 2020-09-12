@@ -94,8 +94,8 @@ function attach() {
     });
 }
 
-//let ws = new WebSocket('wss://wsrs.nat.moe/rs');
-let ws = new WebSocket('ws://127.0.0.1:8080/rs');
+let ws = new WebSocket('wss://wsrs.nat.moe/rs');
+//let ws = new WebSocket('ws://127.0.0.1:8080/rs');
 
 const term = new Terminal();
 
