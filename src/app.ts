@@ -81,7 +81,9 @@ function attach() {
 
         console.log(`blocked: ${blocked}`);
         if (!ready) {
+            term.write(`Connected to ${url}.\r\n`);
             ready = true;
+            term.focus();
             reader();
         }
 
@@ -116,8 +118,8 @@ function attach() {
     });
 }
 
-let ws = new WebSocket('wss://wsrs.nat.moe/rs');
-//let ws = new WebSocket('ws://127.0.0.1:8080/rs');
+const url = 'wss://wsrs.nat.moe/rs';
+let ws = new WebSocket(url);
 
 const term = new Terminal();
 
@@ -130,13 +132,15 @@ term.loadAddon(localEcho);
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
 
+term.write(`Trying ${url}...\r\n`);
+
 window.onresize = () => fitAddon.fit();
 ws.onopen = () => attach();
 ws.onerror = () => {
     ready = false;
-    term.write('Error connecting to rs.\r\n');
+    term.write('Connection refused.\r\n');
 }
 ws.onclose = () => {
     ready = false;
-    term.write('Disconnected.\r\n');
+    term.write('Connection closed by foreign host.\r\n');
 }

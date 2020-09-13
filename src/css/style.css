@@ -8,7 +8,13 @@ body, h1, h2, h3, h4, h5, h6, p, ol, ul {
     font-weight: normal;
 }
 
-.terminal {
-    height: 100vh;
+html, body, .terminal {
+    height: 100%;
     width: 100vw;
+}
+
+.terminal {
+    position: fixed;
+    top: 0;
+    right: 0;
 }
