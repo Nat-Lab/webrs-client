@@ -7,6 +7,7 @@ import './css/style.css';
 let tryBlock: boolean = false;
 let blocked: boolean = true;
 let ready: boolean = false;
+let lastIsHelp: boolean = false;
 let serverBuffer: string = '';
 
 const blockKeys = ['\x14', '\x1f', '\x17', '\x15', '\x19', '\t'];
@@ -33,6 +34,7 @@ async function reader() {
             await more();
             await (function () {
                 let p = localEcho.read('rs> ', '> ');
+                console.log('cli read head ready');
                 if (serverBuffer != '') {
                     console.log(`inject buffer: "${serverBuffer}"`);
                     localEcho.handleTermData(serverBuffer);
@@ -60,7 +62,6 @@ function attach() {
 
         if (tryBlock && resMatch) {
             if (blocked) {
-                msg = msg.replace(/rs> /g, '');
                 tryBlock = false;
                 resolveMore();
             }
@@ -75,24 +76,40 @@ function attach() {
         msg = msg.replace(/\?/g, '');
 
         if (msg.includes('--More--')) {
-            localEcho.abortRead('--More-- block');
             tryBlock = true;
         }
 
         console.log(`blocked: ${blocked}`);
-        if (!ready) msg = msg.replace('rs> ', '');
-
         if (!ready) {
             ready = true;
             reader();
         }
 
+        localEcho.abortRead('data in');
+
+        if (msg.includes('rs> ') && lastIsHelp) {
+            lastIsHelp = false;
+            tryBlock = false;
+            resolveMore();
+        }
+        
+        msg = msg.replace(/rs> /g, '');
+
+        if (msg == '\r\n') {
+            console.log(`ignored server-side newline.`);
+            return;
+        }
+
         term.write(msg);
+        console.log(`to-term: "${msg}"`);
     }
 
     term.onData((data) => {
         if (data.length < 0) return;
-        if (data[0] == '?') localEcho._input = localEcho._input.replace(/\?/g, '');
+        if (data[0] == '?') {
+            lastIsHelp = true;
+            localEcho._input = localEcho._input.replace(/\?/g, '');
+        }
         if (blockKeys.includes(data[0])) return;
         ws.send(data);
         console.log(`out: "${data}"`);
