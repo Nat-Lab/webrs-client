@@ -39,7 +39,7 @@ window.onresize = () => fitAddon.fit();
 
 term.write(`Trying ${url}...\r\n`);
 
-let ws = new WebSocket(`${url}/${term.getOption('rows')}`);
+let ws = new WebSocket(`${url}/${fitAddon.proposeDimensions().rows}`);
 const attachAddon = new AttachAddon(ws);
 term.loadAddon(attachAddon);
 
