@@ -60,6 +60,12 @@ ws.onopen = () => {
     handleSizeChange();
     term.write(`Connected to ${url}.\r\n`);
     term.focus();
+
+    let hash = window.location.hash;
+
+    if (hash != '') {
+        ws.send(`${window.decodeURIComponent(hash.replace('#', ''))}\r`);
+    }
 }
 ws.onerror = () => term.write('Connection reset.\r\n');
 ws.onclose = () => term.write('Connection closed by foreign host.\r\n');

@@ -8,6 +8,8 @@ import { ILinkProvider, ILink, Terminal } from 'xterm';
 import { BgpObjectType } from './BgpObjectType';
 
 export class BgpLinkProvider implements ILinkProvider {
+    private readonly _regexCommand = /rs> (\S+(\s+\S+)+)/;
+
     private readonly _regexAs = /AS[1-9]+[0-9]*/g;
 
     // bad cidr part, but whatever
@@ -24,15 +26,16 @@ export class BgpLinkProvider implements ILinkProvider {
 
     public provideLinks(y: number, cb: (links: ILink[] | undefined) => void): void {
         let results: ILink[] = [];
-        results = results.concat(LinkComputer.computeLink(y, this._regexAs, this._terminal, BgpObjectType.Asn, this._handler));
-        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix4, this._terminal, BgpObjectType.Prefix4, this._handler));
-        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix6, this._terminal, BgpObjectType.Prefix6, this._handler));
+        results = results.concat(LinkComputer.computeLink(y, this._regexCommand, 1, this._terminal, BgpObjectType.Command, this._handler));
+        results = results.concat(LinkComputer.computeLink(y, this._regexAs, 0, this._terminal, BgpObjectType.Asn, this._handler));
+        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix4, 0, this._terminal, BgpObjectType.Prefix4, this._handler));
+        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix6, 0, this._terminal, BgpObjectType.Prefix6, this._handler));
         cb(results);
     }
 }
 
 export class LinkComputer {
-    public static computeLink(y: number, regex: RegExp, terminal: Terminal, type: BgpObjectType, handler: (event: MouseEvent, type: BgpObjectType, target: string) => void): ILink[] {
+    public static computeLink(y: number, regex: RegExp, i: number, terminal: Terminal, type: BgpObjectType, handler: (event: MouseEvent, type: BgpObjectType, target: string) => void): ILink[] {
         const rex = new RegExp(regex);
 
         const [line, startLineIndex] = LinkComputer._translateBufferLineToStringWithWrap(y - 1, false, terminal);
@@ -42,7 +45,8 @@ export class LinkComputer {
         const result: ILink[] = [];
 
         while ((match = rex.exec(line)) !== null) {
-            const text = match[0];
+            console.log(match);
+            const text = match[i];
             if (!text) {
                 // something matched but does not comply with the given matchIndex
                 // since this is most likely a bug the regex itself we simply do nothing here

@@ -8,13 +8,26 @@ import { Terminal, ITerminalAddon, IDisposable } from 'xterm';
 import { BgpLinkProvider } from './BgpLinkProvider';
 import { BgpObjectType } from './BgpObjectType';
 
-function handleBgpLink(event: MouseEvent, type: BgpObjectType, target: string): void {
+function openLink(url: string) {
     const newWindow = window.open();
     if (newWindow) {
         newWindow.opener = null;
-        newWindow.location.href = `https://bgp.he.net/search?search%5Bsearch%5D=${target}`;
+        newWindow.location.href = url;
     } else {
         console.warn('Opening link blocked as opener could not be cleared');
+    }
+}
+
+function handleBgpLink(event: MouseEvent, type: BgpObjectType, target: string): void {
+    switch (type) {
+        case BgpObjectType.Asn:
+        case BgpObjectType.Prefix4:
+        case BgpObjectType.Prefix6:
+            openLink(`https://bgp.he.net/search?search%5Bsearch%5D=${target}`);
+            break;
+        case BgpObjectType.Command:
+            openLink(`${window.location.pathname}#${window.encodeURIComponent(target)}`);
+            break;
     }
 }
 
