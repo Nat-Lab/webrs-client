@@ -35,7 +35,13 @@ term.loadAddon(bgpLinkAddon);
 term.open(document.getElementById('terminal'));
 
 fitAddon.fit();
-window.onresize = () => fitAddon.fit();
+if (window.visualViewport) { // fucking iOS Safari
+    document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+    window.visualViewport.onresize = function() {
+        document.documentElement.style.height = `${this.height}px`;
+        fitAddon.fit();
+    };
+} else window.onresize = () => fitAddon.fit();
 
 term.write(`Trying ${url}...\r\n`);
 
