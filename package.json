@@ -17,6 +17,7 @@
   "dependencies": {
     "local-echo": "github:wavesoft/local-echo",
     "xterm": "^4.9.0",
+    "xterm-addon-attach": "^0.6.0",
     "xterm-addon-fit": "^0.4.0"
   }
 }
