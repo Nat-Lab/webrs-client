@@ -10,7 +10,6 @@ const url = 'wss://wsrs.nat.moe/rs';
 
 let ws = new WebSocket(url);
 const term = new Terminal({
-    fontFamily: 'PT Mono',
     theme: {
         foreground: '#C5C8C6',
         background: '#1D1F21',
