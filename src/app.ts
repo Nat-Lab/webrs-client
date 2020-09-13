@@ -29,27 +29,35 @@ const term = new Terminal({
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
 
+const handleSizeChange = function() {
+    let dim = fitAddon.proposeDimensions();
+    fitAddon.fit();
+    if (ws.readyState == 1) {
+        ws.send(`\t\r\n\ttermsz;${dim.rows},${dim.cols}`);
+    }
+};
+
 const bgpLinkAddon = new BgpLinkAddon();
 term.loadAddon(bgpLinkAddon);
 
 term.open(document.getElementById('terminal'));
 
-fitAddon.fit();
 if (window.visualViewport) { // fucking iOS Safari
     document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
     window.visualViewport.onresize = function() {
         document.documentElement.style.height = `${this.height}px`;
-        fitAddon.fit();
+        handleSizeChange();
     };
-} else window.onresize = () => fitAddon.fit();
+} else window.onresize = () => handleSizeChange();
 
 term.write(`Trying ${url}...\r\n`);
 
-let ws = new WebSocket(`${url}/${fitAddon.proposeDimensions().rows}`);
+let ws = new WebSocket(`${url}/`);
 const attachAddon = new AttachAddon(ws);
 term.loadAddon(attachAddon);
 
 ws.onopen = () => {
+    handleSizeChange();
     term.write(`Connected to ${url}.\r\n`);
     term.focus();
 }
