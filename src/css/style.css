@@ -1,21 +1,18 @@
 *, *:before, *:after {
-    box-sizing: inherit;
+    box-sizing: border-box;
 }
 
 body, h1, h2, h3, h4, h5, h6, p, ol, ul {
     margin: 0;
     padding: 0;
-    font-weight: normal;
 }
 
 html, body, .terminal {
-    height: 100%;
-    width: 100vw;
-    background-color: '#1D1F21';
+    background-color: #1D1F21;
 }
 
-.terminal {
-    position: fixed;
-    top: 0;
-    right: 0;
+.container {
+    height: 100%;
+    width: 100vw;
+    padding: .5em;
 }

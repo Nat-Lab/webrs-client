@@ -15,7 +15,6 @@ const term = new Terminal({
         background: '#1D1F21',
         cursor: '#C5C8C6',
         cursorAccent: '#C5C8C6',
-        selection: null,
         black: '#373B41',
         red: '#CC6666',
         green: '#B5BD68',
@@ -42,6 +41,9 @@ fitAddon.fit();
 
 term.write(`Trying ${url}...\r\n`);
 window.onresize = () => fitAddon.fit();
-ws.onopen = () => term.write(`Connected to ${url}.\r\n`)
+ws.onopen = () => {
+    term.write(`Connected to ${url}.\r\n`);
+    term.focus();
+}
 ws.onerror = () => term.write('Connection reset.\r\n');
 ws.onclose = () => term.write('Connection closed by foreign host.\r\n');
