@@ -4,6 +4,7 @@ import { AttachAddon } from 'xterm-addon-attach';
 import { BgpLinkAddon } from './addons/bgp-link/BgpLinkAddon';
 import 'xterm/css/xterm.css';
 import './css/style.css';
+const pkg: any = require('../package.json');
 
 //const url = 'ws://127.0.0.1:8080/rs';
 const url = 'wss://wsrs.nat.moe/rs';
@@ -41,6 +42,7 @@ const bgpLinkAddon = new BgpLinkAddon();
 term.loadAddon(bgpLinkAddon);
 
 term.open(document.getElementById('terminal'));
+term.write(`\x1b[1;30mnato webrs (client version: ${pkg.version}) ready.\x1b[0m\r\n`);
 
 if (window.visualViewport) { // fucking iOS Safari
     document.documentElement.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
