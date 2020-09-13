@@ -19,23 +19,29 @@ export class BgpLinkProvider implements ILinkProvider {
 
     constructor(
         private readonly _terminal: Terminal,
-        private readonly _handler: (event: MouseEvent, type: BgpObjectType, target: string) => void
+        private readonly _handler: (event: MouseEvent, type: BgpObjectType, target: string) => void,
+        private readonly _hover: (event: MouseEvent, type: BgpObjectType, target: string) => void,
+        private readonly _leave: (event: MouseEvent, type: BgpObjectType, target: string) => void,
+
     ) {
 
     }
 
     public provideLinks(y: number, cb: (links: ILink[] | undefined) => void): void {
         let results: ILink[] = [];
-        results = results.concat(LinkComputer.computeLink(y, this._regexCommand, 1, this._terminal, BgpObjectType.Command, this._handler));
-        results = results.concat(LinkComputer.computeLink(y, this._regexAs, 0, this._terminal, BgpObjectType.Asn, this._handler));
-        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix4, 0, this._terminal, BgpObjectType.Prefix4, this._handler));
-        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix6, 0, this._terminal, BgpObjectType.Prefix6, this._handler));
+        results = results.concat(LinkComputer.computeLink(y, this._regexCommand, 1, this._terminal, BgpObjectType.Command, this._handler, this._hover, this._leave));
+        results = results.concat(LinkComputer.computeLink(y, this._regexAs, 0, this._terminal, BgpObjectType.Asn, this._handler, this._hover, this._leave));
+        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix4, 0, this._terminal, BgpObjectType.Prefix4, this._handler, this._hover, this._leave));
+        results = results.concat(LinkComputer.computeLink(y, this._regexPrefix6, 0, this._terminal, BgpObjectType.Prefix6, this._handler, this._hover, this._leave));
         cb(results);
     }
 }
 
 export class LinkComputer {
-    public static computeLink(y: number, regex: RegExp, i: number, terminal: Terminal, type: BgpObjectType, handler: (event: MouseEvent, type: BgpObjectType, target: string) => void): ILink[] {
+    public static computeLink(y: number, regex: RegExp, i: number, terminal: Terminal, type: BgpObjectType,
+        handler: (event: MouseEvent, type: BgpObjectType, target: string) => void,
+        hover: (event: MouseEvent, type: BgpObjectType, target: string) => void,
+        leave: (event: MouseEvent, type: BgpObjectType, target: string) => void): ILink[] {
         const rex = new RegExp(regex);
 
         const [line, startLineIndex] = LinkComputer._translateBufferLineToStringWithWrap(y - 1, false, terminal);
@@ -84,7 +90,13 @@ export class LinkComputer {
                 }
             };
 
-            result.push({ range, text, activate: (event: MouseEvent, target: string) => handler(event, type, target) });
+            result.push({
+                range,
+                text,
+                activate: (event: MouseEvent, target: string) => handler(event, type, target),
+                hover: (event: MouseEvent, target: string) => hover(event, type, target),
+                leave: (event: MouseEvent, target: string) => leave(event, type, target),
+            });
         }
 
         return result;

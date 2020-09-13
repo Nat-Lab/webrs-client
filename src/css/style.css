@@ -23,3 +23,14 @@ html, body, .container {
 .container {
     padding: .5em;
 }
+
+.tooltip {
+    color: #C5C8C6;
+    position: absolute;
+    top: .25em;
+    padding: .2em;
+    font-family: monospace;
+    background-color: rgba(29, 31, 33, 0.84);
+    border: 2px solid #C5C8C6;
+    z-index: 114514;
+}

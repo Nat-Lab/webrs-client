@@ -1,4 +1,4 @@
 node_modules
-*.js
-*.map
-*.tar.gz
+public/*.js
+public/*.tar.gz
+public/*.map
