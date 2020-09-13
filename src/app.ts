@@ -1,6 +1,7 @@
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
+import { BgpLinkAddon } from './addons/bgp-link/BgpLinkAddon';
 import 'xterm/css/xterm.css';
 import './css/style.css';
 
@@ -33,6 +34,9 @@ term.loadAddon(fitAddon);
 
 const attachAddon = new AttachAddon(ws);
 term.loadAddon(attachAddon);
+
+const bgpLinkAddon = new BgpLinkAddon();
+term.loadAddon(bgpLinkAddon);
 
 term.open(document.getElementById('terminal'));
 fitAddon.fit();
