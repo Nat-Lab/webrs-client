@@ -8,7 +8,6 @@ import './css/style.css';
 //const url = 'ws://127.0.0.1:8080/rs';
 const url = 'wss://wsrs.nat.moe/rs';
 
-let ws = new WebSocket(url);
 const term = new Terminal({
     theme: {
         foreground: '#C5C8C6',
@@ -30,17 +29,20 @@ const term = new Terminal({
 const fitAddon = new FitAddon();
 term.loadAddon(fitAddon);
 
-const attachAddon = new AttachAddon(ws);
-term.loadAddon(attachAddon);
-
 const bgpLinkAddon = new BgpLinkAddon();
 term.loadAddon(bgpLinkAddon);
 
 term.open(document.getElementById('terminal'));
+
 fitAddon.fit();
+window.onresize = () => fitAddon.fit();
 
 term.write(`Trying ${url}...\r\n`);
-window.onresize = () => fitAddon.fit();
+
+let ws = new WebSocket(`${url}/${term.getOption('rows')}`);
+const attachAddon = new AttachAddon(ws);
+term.loadAddon(attachAddon);
+
 ws.onopen = () => {
     term.write(`Connected to ${url}.\r\n`);
     term.focus();

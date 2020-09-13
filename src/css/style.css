@@ -8,11 +8,16 @@ body, h1, h2, h3, h4, h5, h6, p, ol, ul {
 }
 
 html, body, .terminal {
+    height: 100%;
+    width: 100%;
     background-color: #1D1F21;
 }
 
-.container {
+html, body, .container {
     height: 100%;
     width: 100vw;
+}
+
+.container {
     padding: .5em;
 }
