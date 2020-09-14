@@ -67,9 +67,9 @@ export class BgpLinkHandler {
                 this._loadTooltipAsnName(target);
                 break;
             }
-            case BgpObjectType.Prefix4: this._element.innerText = 'Lookup IPv4 prefix on bgp.he.net.'; break;
-            case BgpObjectType.Prefix6: this._element.innerText = 'Lookup IPv6 prefix on bgp.he.net.'; break;
-            case BgpObjectType.Command: this._element.innerText = 'Run command in new window.'; break;
+            case BgpObjectType.Prefix4: this._element.innerText = 'Click to lookup IPv4 prefix on bgp.he.net.'; break;
+            case BgpObjectType.Prefix6: this._element.innerText = 'Click to lookup IPv6 prefix on bgp.he.net.'; break;
+            case BgpObjectType.Command: this._element.innerText = 'Click to run command in new window.'; break;
         }
 
         this._moveToolTip(event);
