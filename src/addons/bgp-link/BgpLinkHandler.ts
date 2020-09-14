@@ -4,10 +4,13 @@ import { RipeApi } from "./RipeApi";
 
 export class BgpLinkHandler {
     private _element: HTMLElement | undefined;
-    private readonly _ripeApi: RipeApi;
+    private _lastClick: string | undefined;
+    private readonly _ripeApi: RipeApi | undefined;
+    private readonly _touchMode: boolean | undefined;
    
     public constructor(private readonly _terminal: Terminal) {
         this._ripeApi = new RipeApi();
+        this._touchMode = 'ontouchstart' in window;
     }
 
     private static _openLink(url: string) {
@@ -37,6 +40,13 @@ export class BgpLinkHandler {
     }
 
     public handleBgpLink(event: MouseEvent, type: BgpObjectType, target: string): void {
+        if (this._touchMode && (this._lastClick != target)) {
+            this._lastClick = target;
+            return;
+        }
+
+        this._lastClick = '';
+
         switch (type) {
             case BgpObjectType.Asn:
             case BgpObjectType.Prefix4:
@@ -50,7 +60,8 @@ export class BgpLinkHandler {
     }
     
     public handleBgpLinkHover(event: MouseEvent, type: BgpObjectType, target: string): void {
-        const asNameHtml = '<div class="as-name loading" id="as-name">as-name loading...</div><div class="muted">Click to view on bgp.he.net.</div>';
+        const verb = this._touchMode ? 'Tap again' : 'Click';
+        const asNameHtml = `<div class="as-name loading" id="as-name">as-name loading...</div><div class="muted">${verb} to view on bgp.he.net.</div>`;
 
         if (this._element) {
             console.warn('link hover: last element not removed.');
@@ -60,16 +71,16 @@ export class BgpLinkHandler {
         this._element = document.createElement('div');
         this._element.classList.add('xterm-hover');
         this._element.classList.add('tooltip');
-        
+
         switch(type) {
             case BgpObjectType.Asn: {
                 this._element.innerHTML = asNameHtml;
                 this._loadTooltipAsnName(target);
                 break;
             }
-            case BgpObjectType.Prefix4: this._element.innerText = 'Click to lookup IPv4 prefix on bgp.he.net.'; break;
-            case BgpObjectType.Prefix6: this._element.innerText = 'Click to lookup IPv6 prefix on bgp.he.net.'; break;
-            case BgpObjectType.Command: this._element.innerText = 'Click to run command in new window.'; break;
+            case BgpObjectType.Prefix4: this._element.innerText = `${verb} to lookup IPv4 prefix on bgp.he.net.`; break;
+            case BgpObjectType.Prefix6: this._element.innerText = `${verb} to lookup IPv6 prefix on bgp.he.net.`; break;
+            case BgpObjectType.Command: this._element.innerText = `${verb} to run command in new window.`; break;
         }
 
         this._moveToolTip(event);
