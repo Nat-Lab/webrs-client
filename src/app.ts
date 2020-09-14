@@ -5,7 +5,6 @@ import { BgpLinkAddon } from './addons/bgp-link/BgpLinkAddon';
 import * as Hammer from 'hammerjs';
 import 'xterm/css/xterm.css';
 import './css/style.css';
-import { DIRECTION_ALL, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT, DIRECTION_UP } from 'hammerjs';
 const pkg: any = require('../package.json');
 
 //const url = 'ws://127.0.0.1:8080/rs';
@@ -80,19 +79,23 @@ if ('ontouchstart' in window) {
     let hintEl = document.createElement('div');
     hintEl.classList.add('xterm-hover');
     hintEl.classList.add('tooltip');
-    hintEl.innerHTML = '<div>Touchscreen detected. Swipe up/down/left/right with two fingers to move the cursor.</div><div class="muted">Tap on this message to dismiss.</div>';
+    hintEl.innerHTML = '<div>Touchscreen detected - Swipe left/right to move the cursor, double tap to go back in history.</div><div class="muted">Tap on this message to dismiss.</div>';
     hintEl.onclick = () => hintEl.remove();
 
     term.element.appendChild(hintEl);
 
-    hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL, pointers: 2 });
+    hammer.get('swipe').set({ direction: Hammer.DIRECTION_HORIZONTAL });
     hammer.on('swipe', (e) => {
         if (ws.readyState != 1) return;
         switch(e.direction) {
-            case DIRECTION_UP: ws.send('\x1b[A'); break;
-            case DIRECTION_DOWN: ws.send('\x1b[B'); break;
-            case DIRECTION_RIGHT: ws.send('\x1b[C'); break;
-            case DIRECTION_LEFT: ws.send('\x1b[D'); break;
+            case Hammer.DIRECTION_RIGHT: ws.send('\x1b[C'); break;
+            case Hammer.DIRECTION_LEFT: ws.send('\x1b[D'); break;
         };
+    });
+
+    hammer.get('tap').set({ taps: 2 });
+    hammer.on('tap', (e) => {
+        if (ws.readyState != 1) return;
+        ws.send('\x1b[A');
     });
 }
