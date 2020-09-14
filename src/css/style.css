@@ -34,3 +34,15 @@ html, body, .container {
     border: 2px solid #C5C8C6;
     z-index: 114514;
 }
+
+.as-name {
+    font-weight: bold;
+}
+
+.loading, .muted {
+    color: #a5a8a6;
+}
+
+.muted {
+    font-size: .85em;
+}

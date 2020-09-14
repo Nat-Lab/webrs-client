@@ -51,7 +51,6 @@ export class LinkComputer {
         const result: ILink[] = [];
 
         while ((match = rex.exec(line)) !== null) {
-            console.log(match);
             const text = match[i];
             if (!text) {
                 // something matched but does not comply with the given matchIndex
