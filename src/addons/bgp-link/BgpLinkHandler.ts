@@ -4,7 +4,6 @@ import { RipeApi } from "./RipeApi";
 
 export class BgpLinkHandler {
     private _element: HTMLElement | undefined;
-    private _lastClick: string | undefined;
     private readonly _ripeApi: RipeApi | undefined;
     private readonly _touchMode: boolean | undefined;
    
@@ -39,14 +38,7 @@ export class BgpLinkHandler {
         }
     }
 
-    public handleBgpLink(event: MouseEvent, type: BgpObjectType, target: string): void {
-        if (this._touchMode && (this._lastClick != target)) {
-            this._lastClick = target;
-            return;
-        }
-
-        this._lastClick = '';
-
+    public handleBgpLink(event: MouseEvent | null, type: BgpObjectType, target: string, overrideOpen: boolean = false): void {
         switch (type) {
             case BgpObjectType.Asn:
             case BgpObjectType.Prefix4:
@@ -60,7 +52,7 @@ export class BgpLinkHandler {
     }
     
     public handleBgpLinkHover(event: MouseEvent, type: BgpObjectType, target: string): void {
-        const verb = this._touchMode ? 'Tap again' : 'Click';
+        const verb = this._touchMode ? 'Tap here' : 'Click';
         const asNameHtml = `<div class="as-name loading" id="as-name">as-name loading...</div><div class="muted">${verb} to view on bgp.he.net.</div>`;
 
         if (this._element) {
@@ -84,7 +76,12 @@ export class BgpLinkHandler {
         }
 
         this._moveToolTip(event);
-        this._terminal.element.addEventListener('mousemove', this._moveToolTip);
+
+        if (!this._touchMode) this._terminal.element.addEventListener('mousemove', this._moveToolTip);
+        else this._element.addEventListener('touchend', (e) => {
+            this.handleBgpLink(null, type, target, true);
+        });
+
         this._terminal.element.appendChild(this._element);
     }
     
@@ -93,7 +90,7 @@ export class BgpLinkHandler {
 
         this._element?.remove();
         this._element = undefined;
-        this._terminal.element.removeEventListener('mousemove', this._moveToolTip);
+        if (!this._touchMode) this._terminal.element.removeEventListener('mousemove', this._moveToolTip);
     }
 
 };
