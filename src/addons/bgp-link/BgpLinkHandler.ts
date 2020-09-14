@@ -39,6 +39,8 @@ export class BgpLinkHandler {
     }
 
     public handleBgpLink(event: MouseEvent | null, type: BgpObjectType, target: string, overrideOpen: boolean = false): void {
+        if (this._touchMode && !overrideOpen) return;
+
         switch (type) {
             case BgpObjectType.Asn:
             case BgpObjectType.Prefix4:
