@@ -15,6 +15,8 @@
     "webpack": "^4.44.1"
   },
   "dependencies": {
+    "@types/hammerjs": "^2.0.36",
+    "hammerjs": "^2.0.8",
     "xterm": "^4.9.0",
     "xterm-addon-attach": "^0.6.0",
     "xterm-addon-fit": "^0.4.0"

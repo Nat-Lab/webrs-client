@@ -2,8 +2,10 @@ import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 import { AttachAddon } from 'xterm-addon-attach';
 import { BgpLinkAddon } from './addons/bgp-link/BgpLinkAddon';
+import * as Hammer from 'hammerjs';
 import 'xterm/css/xterm.css';
 import './css/style.css';
+import { DIRECTION_ALL, DIRECTION_DOWN, DIRECTION_LEFT, DIRECTION_RIGHT, DIRECTION_UP } from 'hammerjs';
 const pkg: any = require('../package.json');
 
 //const url = 'ws://127.0.0.1:8080/rs';
@@ -71,3 +73,26 @@ ws.onopen = () => {
 }
 ws.onerror = () => term.write('\x1b[0;30mConnection reset.\x1b[0m\r\n');
 ws.onclose = () => term.write('\x1b[0;30mConnection closed by foreign host.\x1b[0m\r\n');
+
+if ('ontouchstart' in window) {
+    let hammer = new Hammer(term.element);
+
+    let hintEl = document.createElement('div');
+    hintEl.classList.add('xterm-hover');
+    hintEl.classList.add('tooltip');
+    hintEl.innerHTML = '<div>Touchscreen detected. Swipe up/down/left/right with two fingers to move the cursor.</div><div class="muted">Tap on this message to dismiss.</div>';
+    hintEl.onclick = () => hintEl.remove();
+
+    term.element.appendChild(hintEl);
+
+    hammer.get('swipe').set({ direction: Hammer.DIRECTION_ALL, pointers: 2 });
+    hammer.on('swipe', (e) => {
+        if (ws.readyState != 1) return;
+        switch(e.direction) {
+            case DIRECTION_UP: ws.send('\x1b[A'); break;
+            case DIRECTION_DOWN: ws.send('\x1b[B'); break;
+            case DIRECTION_RIGHT: ws.send('\x1b[C'); break;
+            case DIRECTION_LEFT: ws.send('\x1b[D'); break;
+        };
+    });
+}
