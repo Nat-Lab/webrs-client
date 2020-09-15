@@ -1,4 +1,4 @@
-import { IDisposable, Terminal } from "xterm";
+import { Terminal } from "xterm";
 import { BgpObjectType } from "./BgpObjectType";
 import { RipeApi } from "./RipeApi";
 
@@ -24,8 +24,18 @@ export class BgpLinkHandler {
 
     private _moveToolTip = (event: MouseEvent) => {
         if (!this._element) return;
-        this._element.style.left = `${event.clientX + 5}px`;
-        this._element.style.top = `${event.clientY + 5}px`;
+
+        let cx = event.clientX;
+        let cy = event.clientY;
+        let winh = 'visualViewport' in window ? window.visualViewport.height : window.innerHeight;
+        let winl = 'visualViewport' in window ? window.visualViewport.width : window.innerWidth;
+        let ldir = cx <= winl/2 ? 'left' : 'right';
+        let hdir = cy <= winh/2 ? 'top' : 'bottom';
+
+        this._element.style[ldir] = `${cx <= winl/2 ? (cx + 5) : (winl - cx - 5)}px`;
+        this._element.style[hdir] = `${cy <= winh/2 ? (cy + 5) : (winh - cy - 5)}px`;
+        this._element.style.removeProperty(ldir == 'left' ? 'right' : 'left');
+        this._element.style.removeProperty(hdir == 'top' ? 'bottom' : 'top');
     }
 
     private async _loadTooltipAsnName(asn: string) {

@@ -79,6 +79,7 @@ if ('ontouchstart' in window) {
     let hintEl = document.createElement('div');
     hintEl.classList.add('xterm-hover');
     hintEl.classList.add('tooltip');
+    hintEl.classList.add('top-tooltip');
     hintEl.innerHTML = '<div>Touchscreen detected - Swipe left/right to move the cursor, double tap to go back in history.</div><div class="muted">Tap on this message to dismiss.</div>';
     hintEl.onclick = () => hintEl.remove();
 
