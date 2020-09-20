@@ -1,6 +1,6 @@
 {
   "name": "webrs-client",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "webrs client",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
